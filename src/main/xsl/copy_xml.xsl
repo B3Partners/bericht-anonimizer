@@ -8,6 +8,8 @@
                 xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
                 xmlns:gp="http://schemas.kvk.nl/schemas/hrip/generiekproduct/2013/01"
                 xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
+                xmlns:StUFBG0204="http://www.egem.nl/StUF/sector/bg/0204"
+                xmlns:StUF0204="http://www.egem.nl/StUF/StUF0204"
                 xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
                 xmlns:b="http://www.b3p.nl/func">
     <xsl:output method="xml" encoding="utf-8" indent="yes" />
@@ -42,6 +44,7 @@
                          cat:natuurlijkPersoon/cat:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang">
@@ -51,20 +54,35 @@
         </xsl:call-template>
     </xsl:template>
 
-    <!-- Anonimisatie uitzonderingen voor GBA Persoon en Persoon -->
-    <xsl:template match="GbaPersoon:BSN">
+    <!-- Anonimisatie uitzonderingen voor GBA Persoon en Persoon en StUFBG0204/StUF0204 PRS -->
+    <xsl:template match="GbaPersoon:BSN |
+                         StUFBG0204:a-nummer |
+                         StUFBG0204:bsn-nummer |
+                         StUFBG0204:bankgiroRekeningnummer |
+                         StUFBG0204:nummerIdentiteitsbewijs |
+                         StUF0204:extraElement[@naam='iban'] |
+                         StUF0204:extraElement[@naam='lengteHouder']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="GbaPersoon:voornamen |
                          Persoon:voornamen |
+                         StUFBG0204:voornamen |
+                         StUFBG0204:voorletters |
                          GbaPersoon:geboorteplaats |
                          Persoon:geboorteplaats |
+                         StUFBG0204:geboorteplaats |
                          GbaPersoon:geslachtsnaam |
                          Persoon:geslachtsnaam |
+                         StUFBG0204:geslachtsnaam |
                          GbaPersoon:voorvoegselsGeslachtsnaam |
-                         Persoon:voorvoegselsGeslachtsnaam">
+                         Persoon:voorvoegselsGeslachtsnaam |
+                         StUFBG0204:voorvoegselGeslachtsnaam |
+                         StUFBG0204:indicatieGezagMinderjarige |
+                         StUFBG0204:indicatieCuratelestelling |
+                         StUFBG0204:aanduidingBijzonderNederlanderschap |
+                         StUF0204:extraElement[@naam='geslachtsNaamEchtgenoot']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
         </xsl:call-template>
@@ -72,7 +90,9 @@
     <xsl:template match="GbaPersoon:geboortedatum | 
                          Persoon:geboortedatum | 
                          GbaPersoon:datumOverlijden | 
-                         Persoon:datumOverlijden">
+                         Persoon:datumOverlijden |
+                         StUFBG0204:geboortedatum |
+                         StUFBG0204:datumOverlijden">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
@@ -96,6 +116,7 @@
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
                 <xsl:text>&#10;</xsl:text>
             </xsl:when>
+            <!--<xsl:when test="$mode eq 'date'"></xsl:when>-->
             <xsl:otherwise>
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')" />
                 <xsl:text>&#10;</xsl:text>
