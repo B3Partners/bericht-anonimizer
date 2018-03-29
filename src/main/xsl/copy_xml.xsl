@@ -1,112 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:GbaPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-gba-persoon/v20120901" xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201" xmlns:digest="org.apache.commons.codec.digest.DigestUtils" xmlns:b="http://www.b3p.nl/func">
-	<xsl:output method="xml" encoding="utf-8" indent="yes"/>
-	<!-- usage: java -cp "./saxon9.jar;./commons-codec-1.11.jar" net.sf.saxon.Transform -s:bron.xml -xsl:copy_xml.xsl -o:output.xml -->
-	<xsl:template match="/">
-		<xsl:comment select="concat ('Geanonimiseerd door B3Partners BV op ', current-date(), ', zie commentaar in bericht.')"/> 
-		<xsl:apply-templates/>
-	</xsl:template>
-	<!-- Identity template : copy all text nodes, elements and attributes -->
-	<xsl:template match="@*|node()">
-		<xsl:copy>
-			<xsl:apply-templates select="@*|node()"/>
-		</xsl:copy>
-	</xsl:template>
-	<!-- Anonimisatie uitzonderingen voor GBA Persoon en Persoon -->
-	<xsl:template match="GbaPersoon:BSN">
-		<xsl:call-template name="replace_hash_element">
-			<xsl:with-param name="e" select="."/>
-		</xsl:call-template>
-	</xsl:template>
-	<xsl:template match="GbaPersoon:voornamen | Persoon:voornamen | GbaPersoon:geboorteplaats | Persoon:geboorteplaats | GbaPersoon:geslachtsnaam | Persoon:geslachtsnaam | GbaPersoon:voorvoegselsGeslachtsnaam | Persoon:voorvoegselsGeslachtsnaam">
-		<xsl:call-template name="replace_hash_element">
-			<xsl:with-param name="e" select="."/>
-		</xsl:call-template>
-	</xsl:template>
-	<xsl:template match="GbaPersoon:geboortedatum | Persoon:geboortedatum | GbaPersoon:datumOverlijden | Persoon:datumOverlijden">
-		<xsl:call-template name="replace_hash_element">
-			<xsl:with-param name="e" select="."/>
-			<xsl:with-param name="mode" select="'date'"/>
-		</xsl:call-template>
-	</xsl:template>
-	<xsl:template name="replace_hash_element">
-		<xsl:param name="e"/>
-		<xsl:param name="mode" select="'string'"/>
-		<xsl:element name="{name($e)}">
-			<!-- kopieer ook de attributen -->
-			<xsl:apply-templates select="@*"/>
-			<!-- bereken hash met de zelfde lengte als origineel -->
-			<xsl:call-template name="hashed_length">
-				<xsl:with-param name="o" select="$e"/>
-				<xsl:with-param name="mode" select="$mode"/>
-			</xsl:call-template>
-		</xsl:element>
-		<xsl:choose>
-			<xsl:when test="$mode eq 'date'">
-				<xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')"/>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-	<xsl:template name="hashed_length" as="xs:string">
-		<xsl:param name="o" as="xs:string"/>
-		<xsl:param name="mode" as="xs:string"/>
-		<xsl:variable name="o_length">
-			<xsl:value-of select="string-length($o)"/>
-		</xsl:variable>
-		<xsl:variable name="o_hashed">
-			<!-- bereken sha256 hash -->
-			<xsl:call-template name="hash">
-				<xsl:with-param name="o" select="."/>
-			</xsl:call-template>
-		</xsl:variable>
-		<xsl:choose>
-			<xsl:when test="$mode eq 'date'">
-				<!--xsl:value-of select="'0001-01-01'"/ -->
-				<xsl:variable name="d_hashed">
-					<xsl:value-of select="translate($o_hashed, 'abcdef', '')"/>
-				</xsl:variable>
-				<xsl:variable name="d_jaar" as="xs:integer">
-					<xsl:value-of select="ceiling(number(substring($d_hashed, 1, 2)) + 1930)"/>
-				</xsl:variable>
-				<xsl:variable name="d_maand" as="xs:integer">
-					<xsl:value-of select="ceiling(number(substring($d_hashed, 3, 2)) div 100*11)"/>
-				</xsl:variable>
-				<xsl:variable name="d_dag" as="xs:integer">
-					<xsl:value-of select="ceiling(number(substring($d_hashed, 5, 2)) div 100*30)"/>
-				</xsl:variable>
-				<xsl:variable name="ds_maand" as="xs:string">
-					<xsl:choose>
-						<xsl:when test="$d_maand lt 10">
-							<xsl:value-of select="concat('0', string($d_maand))"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:value-of select="string($d_maand)"/>
-						</xsl:otherwise>
-					</xsl:choose>
-				</xsl:variable>
-				<xsl:variable name="ds_dag" as="xs:string">
-					<xsl:choose>
-						<xsl:when test="$d_dag lt 10">
-							<xsl:value-of select="concat('0', string($d_dag))"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:value-of select="string($d_dag)"/>
-						</xsl:otherwise>
-					</xsl:choose>
-				</xsl:variable>
-				<xsl:value-of select="concat($d_jaar, '-', $ds_maand, '-' , $ds_dag)"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="substring($o_hashed, 1, $o_length)"/>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-	<xsl:template name="hash" as="xs:string">
-		<xsl:param name="o" as="xs:string"/>
-		<!-- zel commons-codec op classpath -->
-		<xsl:sequence select="digest:sha256Hex(string($o))"/>
-	</xsl:template>
+<xsl:stylesheet version="2.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:fo="http://www.w3.org/1999/XSL/Format"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                xmlns:GbaPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-gba-persoon/v20120901"
+                xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
+                xmlns:gp="http://schemas.kvk.nl/schemas/hrip/generiekproduct/2013/01"
+                xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
+                xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
+                xmlns:b="http://www.b3p.nl/func">
+    <xsl:output method="xml" encoding="utf-8" indent="yes" />
+    <xsl:strip-space elements="*" />
+    <!-- usage: java -cp "./saxon9.jar;./commons-codec-1.11.jar" net.sf.saxon.Transform -s:bron.xml -xsl:copy_xml.xsl -o:output.xml -->
+
+    <xsl:template match="/">
+        <xsl:comment select="concat ('Geanonimiseerd door B3Partners BV op ', current-date(), ', zie commentaar in bericht.')" />
+        <xsl:text>&#10;</xsl:text>
+        <xsl:apply-templates />
+    </xsl:template>
+
+    <!-- Identity template : copy all text nodes, elements and attributes -->
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()" />
+        </xsl:copy>
+    </xsl:template>
+
+    <!-- Anonimisatie uitzonderingen voor HR natuurlijkPersoon,
+         cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang is (meestal?) geb. datum
+    -->
+    <xsl:template match="cat:natuurlijkPersoon/cat:bsn">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+        </xsl:call-template>
+    </xsl:template>
+    <xsl:template match="cat:natuurlijkPersoon/cat:volledigeNaam |
+                         cat:natuurlijkPersoon/cat:geslachtsnaam |
+                         cat:natuurlijkPersoon/cat:geslachtsnaamPartner |
+                         cat:natuurlijkPersoon/cat:voornamen |
+                         cat:natuurlijkPersoon/cat:geboorteplaats">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+        </xsl:call-template>
+    </xsl:template>
+    <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'date'" />
+        </xsl:call-template>
+    </xsl:template>
+
+    <!-- Anonimisatie uitzonderingen voor GBA Persoon en Persoon -->
+    <xsl:template match="GbaPersoon:BSN">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+        </xsl:call-template>
+    </xsl:template>
+    <xsl:template match="GbaPersoon:voornamen |
+                         Persoon:voornamen |
+                         GbaPersoon:geboorteplaats |
+                         Persoon:geboorteplaats |
+                         GbaPersoon:geslachtsnaam |
+                         Persoon:geslachtsnaam |
+                         GbaPersoon:voorvoegselsGeslachtsnaam |
+                         Persoon:voorvoegselsGeslachtsnaam">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+        </xsl:call-template>
+    </xsl:template>
+    <xsl:template match="GbaPersoon:geboortedatum | 
+                         Persoon:geboortedatum | 
+                         GbaPersoon:datumOverlijden | 
+                         Persoon:datumOverlijden">
+        <xsl:call-template name="replace_hash_element">
+            <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'date'" />
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="replace_hash_element">
+        <xsl:param name="e" />
+        <xsl:param name="mode" select="'string'" />
+        <xsl:element name="{name($e)}">
+            <!-- kopieer ook de attributen -->
+            <xsl:apply-templates select="@*" />
+            <!-- bereken hash met de zelfde lengte als origineel -->
+            <xsl:call-template name="hashed_length">
+                <xsl:with-param name="o" select="$e" />
+                <xsl:with-param name="mode" select="$mode" />
+            </xsl:call-template>
+        </xsl:element>
+        <xsl:choose>
+            <xsl:when test="$mode eq 'date'">
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
+                <xsl:text>&#10;</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')" />
+                <xsl:text>&#10;</xsl:text>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="hashed_length" as="xs:string">
+        <xsl:param name="o" as="xs:string" />
+        <xsl:param name="mode" as="xs:string" />
+        <xsl:variable name="o_length">
+            <xsl:value-of select="string-length($o)" />
+        </xsl:variable>
+        <xsl:variable name="o_hashed">
+            <!-- bereken sha256 hash -->
+            <xsl:call-template name="hash">
+                <xsl:with-param name="o" select="." />
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+            <xsl:when test="$mode eq 'date'">
+                <!--xsl:value-of select="'0001-01-01'"/ -->
+                <xsl:variable name="d_hashed">
+                    <xsl:value-of select="translate($o_hashed, 'abcdef', '')" />
+                </xsl:variable>
+                <xsl:variable name="d_jaar" as="xs:integer">
+                    <xsl:value-of select="ceiling(number(substring($d_hashed, 1, 2)) + 1930)" />
+                </xsl:variable>
+                <xsl:variable name="d_maand" as="xs:integer">
+                    <xsl:value-of select="ceiling(number(substring($d_hashed, 3, 2)) div 100*11)" />
+                </xsl:variable>
+                <xsl:variable name="d_dag" as="xs:integer">
+                    <xsl:value-of select="ceiling(number(substring($d_hashed, 5, 2)) div 100*30)" />
+                </xsl:variable>
+                <xsl:variable name="ds_maand" as="xs:string">
+                    <xsl:choose>
+                        <xsl:when test="$d_maand lt 10">
+                            <xsl:value-of select="concat('0', string($d_maand))" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="string($d_maand)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="ds_dag" as="xs:string">
+                    <xsl:choose>
+                        <xsl:when test="$d_dag lt 10">
+                            <xsl:value-of select="concat('0', string($d_dag))" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="string($d_dag)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:value-of select="concat($d_jaar, '-', $ds_maand, '-' , $ds_dag)" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="substring($o_hashed, 1, $o_length)" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="hash" as="xs:string">
+        <xsl:param name="o" as="xs:string" />
+        <!-- zet commons-codec op classpath -->
+        <xsl:sequence select="digest:sha256Hex(string($o))" />
+    </xsl:template>
 </xsl:stylesheet>
