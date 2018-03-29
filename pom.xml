@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.b3p</groupId>
+    <artifactId>bericht-anonimizer</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>xml bericht anonimizer</name>
+    <description>B3Partners bericht anonimizer applicatie</description>
+    <url>https://github.com/B3Partners/bericht-anonimizer/</url>
+    <inceptionYear>2018</inceptionYear>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <commons-codec.version>1.11</commons-codec.version>
+        <saxon.version>9.0</saxon.version>
+        <xmlsrcdir>${project.basedir}/src/main/xml</xmlsrcdir>
+        <xmloutputdir>${project.build.directory}</xmloutputdir>
+    </properties>
+    <licenses>
+        <license>
+            <url>https://raw.githubusercontent.com/B3Partners/bericht-anonimizer/master/LICENSE</url>
+            <name>GNU GENERAL PUBLIC LICENSE 3.0</name>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <organization>
+        <name>B3Partners B.V.</name>
+        <url>http://www.b3partners.nl/</url>
+    </organization>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/B3Partners/bericht-anonimizer/issues</url>
+    </issueManagement>
+    <build>
+        <defaultGoal>compile</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- je kunt meerdere transformation sets maken -->
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${xmlsrcdir}</dir>
+                            <stylesheet>${project.basedir}/src/main/xsl/copy_xml.xsl</stylesheet>
+                            <includes>
+                                <include>*.xml</include>
+                            </includes>
+                            <fileMappers>
+                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                    <targetExtension>.anon.xml</targetExtension>
+                                </fileMapper>
+                            </fileMappers>
+                            <outputDir>${xmloutputdir}</outputDir>
+                        </transformationSet>
+                    </transformationSets>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.saxon</groupId>
+                        <!--Saxon "professional edition" is niet open-source en heeft een licentie sleutel nodig,
+                             Saxon "home edition" wel maar heeft niet de mogelijkheid om naar java methodes uit te roepen
+                             wat wel nodig is voor de sha265 hash, Saxon-B heeft die mogelijkheid wel.-->
+                        <!--<artifactId>Saxon-PE</artifactId>-->
+                        <artifactId>Saxon-B</artifactId>
+                        <version>${saxon.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                        <version>${commons-codec.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.sf.saxon</groupId>
+                                    <!--<artifactId>Saxon-PE</artifactId>-->
+                                    <artifactId>Saxon-B</artifactId>
+                                    <version>${saxon.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>commons-codec</groupId>
+                                    <artifactId>commons-codec</artifactId>
+                                    <version>${commons-codec.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
