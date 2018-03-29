@@ -12,7 +12,7 @@
                 xmlns:StUF0204="http://www.egem.nl/StUF/StUF0204"
                 xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
                 xmlns:b="http://www.b3p.nl/func">
-    <xsl:output method="xml" encoding="utf-8" indent="yes" />
+    <xsl:output method="xml" encoding="UTF-8" indent="yes" />
     <xsl:strip-space elements="*" />
     <!-- usage: java -cp "./saxon9.jar;./commons-codec-1.11.jar" net.sf.saxon.Transform -s:bron.xml -xsl:copy_xml.xsl -o:output.xml -->
 
@@ -35,6 +35,7 @@
     <xsl:template match="cat:natuurlijkPersoon/cat:bsn">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="cat:natuurlijkPersoon/cat:volledigeNaam |
@@ -44,7 +45,6 @@
                          cat:natuurlijkPersoon/cat:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
-            <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang">
@@ -64,6 +64,7 @@
                          StUF0204:extraElement[@naam='lengteHouder']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="GbaPersoon:voornamen |
@@ -102,6 +103,7 @@
     <xsl:template name="replace_hash_element">
         <xsl:param name="e" />
         <xsl:param name="mode" select="'string'" />
+
         <xsl:element name="{name($e)}">
             <!-- kopieer ook de attributen -->
             <xsl:apply-templates select="@*" />
@@ -111,12 +113,16 @@
                 <xsl:with-param name="mode" select="$mode" />
             </xsl:call-template>
         </xsl:element>
+
         <xsl:choose>
             <xsl:when test="$mode eq 'date'">
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
                 <xsl:text>&#10;</xsl:text>
             </xsl:when>
-            <!--<xsl:when test="$mode eq 'date'"></xsl:when>-->
+            <xsl:when test="$mode eq 'number'">
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': getal is met behoud van vorm vervangen door een hash van van het oorspronkelijke getal.')" />
+                <xsl:text>&#10;</xsl:text>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')" />
                 <xsl:text>&#10;</xsl:text>
@@ -136,6 +142,7 @@
                 <xsl:with-param name="o" select="." />
             </xsl:call-template>
         </xsl:variable>
+
         <xsl:choose>
             <xsl:when test="$mode eq 'date'">
                 <!--xsl:value-of select="'0001-01-01'"/ -->
@@ -173,6 +180,10 @@
                 </xsl:variable>
                 <xsl:value-of select="concat($d_jaar, '-', $ds_maand, '-' , $ds_dag)" />
             </xsl:when>
+            <xsl:when test="$mode eq 'number'">
+                <xsl:variable name="d_hashed" select="translate($o_hashed,translate($o_hashed, '0123456789',''),'')" />
+                <xsl:value-of select="substring($d_hashed, 1, $o_length)" />
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="substring($o_hashed, 1, $o_length)" />
             </xsl:otherwise>
@@ -184,4 +195,31 @@
         <!-- zet commons-codec op classpath -->
         <xsl:sequence select="digest:sha256Hex(string($o))" />
     </xsl:template>
+
+    <xsl:function name="b:hexToDec">
+        <xsl:param name="hex"/>
+        <xsl:variable name="dec" select="string-length(substring-before('0123456789ABCDEF', substring($hex,1,1)))"/>
+        <xsl:choose>
+            <xsl:when test="matches($hex, '([0-9]*|[A-F]*)')">
+                <xsl:value-of
+                        select="if ($hex = '') then 0
+        else $dec * b:power(16, string-length($hex) - 1) + b:hexToDec(substring($hex,2))"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:message>Provided value is not hexadecimal...</xsl:message>
+                <xsl:value-of select="$hex"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <xsl:function name="b:power">
+        <xsl:param name="base"/>
+        <xsl:param name="exp"/>
+        <xsl:sequence
+                select="if ($exp lt 0) then b:power(1.0 div $base, -$exp)
+                else if ($exp eq 0)
+                then 1e0
+                else $base * b:power($base, $exp - 1)"
+        />
+    </xsl:function>
 </xsl:stylesheet>
