@@ -15,4 +15,4 @@ Draai 1x de `mvn` om de dependencies te downloaden naar de `lib` directory of ze
 
 `java -cp "lib/*" net.sf.saxon.Transform -xsl:src/main/xsl/copy_xml.xsl  -s:/tmp/xml/bron.xml -o:/tmp/xml/bron.anon.xml`
 
-[1] * Er is een versie nodig die het uitroepen naar een java functie ondersteund, dat zijn actuele versies van Saxon-PE of Saxon-HE of oudere versies van Saxon-B.*
+[1]: *Er is een versie nodig die het uitroepen naar een java functie ondersteund, dat zijn actuele versies van Saxon-PE of Saxon-HE of oudere versies van Saxon-B.*
