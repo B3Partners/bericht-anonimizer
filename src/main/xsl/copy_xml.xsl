@@ -45,6 +45,7 @@
                          cat:natuurlijkPersoon/cat:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'restoreWhitespace'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang">
@@ -86,6 +87,7 @@
                          StUF0204:extraElement[@naam='geslachtsNaamEchtgenoot']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
+            <xsl:with-param name="mode" select="'restoreWhitespace'" />
         </xsl:call-template>
     </xsl:template>
     <xsl:template match="GbaPersoon:geboortedatum | 
@@ -117,15 +119,12 @@
         <xsl:choose>
             <xsl:when test="$mode eq 'date'">
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
-                <xsl:text>&#10;</xsl:text>
             </xsl:when>
             <xsl:when test="$mode eq 'number'">
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': getal is met behoud van vorm vervangen door een hash van van het oorspronkelijke getal.')" />
-                <xsl:text>&#10;</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')" />
-                <xsl:text>&#10;</xsl:text>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -133,6 +132,7 @@
     <xsl:template name="hashed_length" as="xs:string">
         <xsl:param name="o" as="xs:string" />
         <xsl:param name="mode" as="xs:string" />
+
         <xsl:variable name="o_length">
             <xsl:value-of select="string-length($o)" />
         </xsl:variable>
@@ -184,6 +184,12 @@
                 <xsl:variable name="d_hashed" select="translate($o_hashed,translate($o_hashed, '0123456789',''),'')" />
                 <xsl:value-of select="substring($d_hashed, 1, $o_length)" />
             </xsl:when>
+            <xsl:when test="$mode eq 'restoreWhitespace'">
+                <xsl:call-template name="restoreOriginalWhitespace">
+                    <xsl:with-param name="o_input" select="."/>
+                    <xsl:with-param name="o_hashed" select="$o_hashed"/>
+                </xsl:call-template>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="substring($o_hashed, 1, $o_length)" />
             </xsl:otherwise>
@@ -195,5 +201,53 @@
         <!-- zet commons-codec op classpath -->
         <xsl:sequence select="digest:sha256Hex(string($o))" />
     </xsl:template>
-    
+
+    <xsl:template name="restoreOriginalWhitespace" as="xs:string">
+        <xsl:param name="o_input" as="xs:string" />
+        <xsl:param name="o_hashed" as="xs:string" />
+
+        <xsl:variable name="words" select="tokenize($o_input, '\s+')"/>
+        <xsl:variable name="withwhitespace">
+            <xsl:for-each select="$words[position()]">
+                <xsl:variable name="pos" select="position()" as="xs:integer"/>
+                <!--lengte van originele woord-->
+                <xsl:variable name="wordlength" as="xs:integer">
+                    <xsl:value-of select="string-length(.)"/>
+                </xsl:variable>
+                <xsl:variable name="subwords" select="subsequence($words, 1, $pos - 1)" />
+                <xsl:variable name="a">
+                    <xsl:call-template name="concatwords">
+                        <xsl:with-param name="wordSeq" select="$subwords"/>
+                        <xsl:with-param name="count" select="$pos"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <!--lengte van woorden tot originele woord-->
+                <xsl:variable name="startpos" as="xs:integer">
+                    <xsl:choose>
+                        <xsl:when test="string-length($a) lt 1">
+                            <xsl:value-of select="1" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="string-length($a)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:value-of select="concat(substring($o_hashed, $startpos, $wordlength), ' ')" />
+            </xsl:for-each>
+        </xsl:variable>
+        <!--trim resultaat-->
+        <xsl:value-of select="replace(replace($withwhitespace,'\s+$',''),'^\s+','')" />
+    </xsl:template>
+
+    <xsl:template name="concatwords" as="xs:string">
+        <xsl:param name="wordSeq" />
+        <xsl:param name="count" />
+        <xsl:variable name="a">
+            <xsl:for-each select="1 to $count" >
+                <xsl:value-of select="concat($wordSeq[current()],'')"/>
+            </xsl:for-each>
+        </xsl:variable>
+        <xsl:value-of select="concat($a,'1')" />
+    </xsl:template>
+
 </xsl:stylesheet>
