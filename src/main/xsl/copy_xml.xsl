@@ -60,7 +60,6 @@
                          StUFBG0204:bsn-nummer |
                          StUFBG0204:bankgiroRekeningnummer |
                          StUFBG0204:nummerIdentiteitsbewijs |
-                         StUF0204:extraElement[@naam='iban'] |
                          StUF0204:extraElement[@naam='lengteHouder']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
@@ -83,6 +82,7 @@
                          StUFBG0204:indicatieGezagMinderjarige |
                          StUFBG0204:indicatieCuratelestelling |
                          StUFBG0204:aanduidingBijzonderNederlanderschap |
+                         StUF0204:extraElement[@naam='iban'] |
                          StUF0204:extraElement[@naam='geslachtsNaamEchtgenoot']">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
@@ -195,31 +195,5 @@
         <!-- zet commons-codec op classpath -->
         <xsl:sequence select="digest:sha256Hex(string($o))" />
     </xsl:template>
-
-    <xsl:function name="b:hexToDec">
-        <xsl:param name="hex"/>
-        <xsl:variable name="dec" select="string-length(substring-before('0123456789ABCDEF', substring($hex,1,1)))"/>
-        <xsl:choose>
-            <xsl:when test="matches($hex, '([0-9]*|[A-F]*)')">
-                <xsl:value-of
-                        select="if ($hex = '') then 0
-        else $dec * b:power(16, string-length($hex) - 1) + b:hexToDec(substring($hex,2))"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:message>Provided value is not hexadecimal...</xsl:message>
-                <xsl:value-of select="$hex"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-
-    <xsl:function name="b:power">
-        <xsl:param name="base"/>
-        <xsl:param name="exp"/>
-        <xsl:sequence
-                select="if ($exp lt 0) then b:power(1.0 div $base, -$exp)
-                else if ($exp eq 0)
-                then 1e0
-                else $base * b:power($base, $exp - 1)"
-        />
-    </xsl:function>
+    
 </xsl:stylesheet>
