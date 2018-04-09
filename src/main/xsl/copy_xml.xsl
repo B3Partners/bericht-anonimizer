@@ -78,6 +78,7 @@
                          Persoon:geslachtsnaam |
                          StUFBG0204:geslachtsnaam |
                          GbaPersoon:voorvoegselsGeslachtsnaam |
+                         GbaPersoon:voorvoegselsgeslachtsnaam |
                          Persoon:voorvoegselsGeslachtsnaam |
                          StUFBG0204:voorvoegselGeslachtsnaam |
                          StUFBG0204:indicatieGezagMinderjarige |
