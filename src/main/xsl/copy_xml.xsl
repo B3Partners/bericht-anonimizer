@@ -6,8 +6,8 @@
                 xmlns:fn="http://www.w3.org/2005/xpath-functions"
                 xmlns:GbaPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-gba-persoon/v20120901"
                 xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
-                xmlns:gp="http://schemas.kvk.nl/schemas/hrip/generiekproduct/2013/01"
                 xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
+                xmlns:cat15="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/01"
                 xmlns:StUFBG0204="http://www.egem.nl/StUF/sector/bg/0204"
                 xmlns:StUF0204="http://www.egem.nl/StUF/StUF0204"
                 xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
@@ -32,7 +32,7 @@
     <!-- Anonimisatie uitzonderingen voor HR natuurlijkPersoon,
          cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang is (meestal?) geb. datum
     -->
-    <xsl:template match="cat:natuurlijkPersoon/cat:bsn">
+    <xsl:template match="cat:natuurlijkPersoon/cat:bsn | cat15:natuurlijkPersoon/cat15:bsn">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'number'" />
@@ -42,13 +42,18 @@
                          cat:natuurlijkPersoon/cat:geslachtsnaam |
                          cat:natuurlijkPersoon/cat:geslachtsnaamPartner |
                          cat:natuurlijkPersoon/cat:voornamen |
-                         cat:natuurlijkPersoon/cat:geboorteplaats">
+                         cat:natuurlijkPersoon/cat:geboorteplaats |
+                         cat15:natuurlijkPersoon/cat15:volledigeNaam |
+                         cat15:natuurlijkPersoon/cat15:geslachtsnaam |
+                         cat15:natuurlijkPersoon/cat15:geslachtsnaamPartner |
+                         cat15:natuurlijkPersoon/cat15:voornamen |
+                         cat15:natuurlijkPersoon/cat15:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
         </xsl:call-template>
     </xsl:template>
-    <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang">
+    <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang | cat15:natuurlijkPersoon/cat15:registratie/cat15:datumAanvang">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
