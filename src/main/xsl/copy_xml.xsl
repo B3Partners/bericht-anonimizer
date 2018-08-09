@@ -65,7 +65,8 @@
     <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang |
                          cat25:natuurlijkPersoon/cat25:registratie/cat25:datumAanvang |
                          cat30:natuurlijkPersoon/cat30:registratie/cat30:datumAanvang |
-                         cat30:geboortedatum">
+                         cat30:geboortedatum |
+                         cat30:datumGeemigreerd">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
