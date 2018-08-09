@@ -64,10 +64,12 @@
     -->
     <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang |
                          cat25:natuurlijkPersoon/cat25:registratie/cat25:datumAanvang |
-                         cat30:natuurlijkPersoon/cat30:registratie/cat30:datumAanvang">
+                         cat30:natuurlijkPersoon/cat30:registratie/cat30:datumAanvang |
+                         cat30:geboortedatum">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
+            <xsl:with-param name="withdash" select="''" />
         </xsl:call-template>
     </xsl:template>
 
@@ -110,8 +112,8 @@
     </xsl:template>
 
     <xsl:template match="GbaPersoon:geboortedatum | 
-                         Persoon:geboortedatum | 
-                         GbaPersoon:datumOverlijden | 
+                         Persoon:geboortedatum |
+                         GbaPersoon:datumOverlijden |
                          Persoon:datumOverlijden |
                          StUFBG0204:geboortedatum |
                          StUFBG0204:datumOverlijden">
@@ -124,6 +126,7 @@
     <xsl:template name="replace_hash_element">
         <xsl:param name="e" />
         <xsl:param name="mode" select="'string'" />
+        <xsl:param name="withdash" select="'-'" />
 
         <xsl:element name="{name($e)}" namespace="{namespace-uri($e)}">
             <!-- kopieer ook de attributen -->
@@ -132,6 +135,7 @@
             <xsl:call-template name="hashed_length">
                 <xsl:with-param name="o" select="$e" />
                 <xsl:with-param name="mode" select="$mode" />
+                <xsl:with-param name="withdash" select="$withdash" />
             </xsl:call-template>
         </xsl:element>
 
@@ -151,6 +155,7 @@
     <xsl:template name="hashed_length" as="xs:string">
         <xsl:param name="o" as="xs:string" />
         <xsl:param name="mode" as="xs:string" />
+        <xsl:param name="withdash" select="'-'" />
 
         <xsl:variable name="o_length">
             <xsl:value-of select="string-length($o)" />
@@ -164,7 +169,6 @@
 
         <xsl:choose>
             <xsl:when test="$mode eq 'date'">
-                <!--xsl:value-of select="'0001-01-01'"/ -->
                 <xsl:variable name="d_hashed">
                     <xsl:value-of select="translate($o_hashed, 'abcdef', '')" />
                 </xsl:variable>
@@ -197,7 +201,7 @@
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
-                <xsl:value-of select="concat($d_jaar, '-', $ds_maand, '-' , $ds_dag)" />
+                <xsl:value-of select="concat($d_jaar, $withdash, $ds_maand, $withdash , $ds_dag)" />
             </xsl:when>
             <xsl:when test="$mode eq 'number'">
                 <xsl:variable name="d_hashed" select="translate($o_hashed,translate($o_hashed, '0123456789',''),'')" />
