@@ -6,12 +6,14 @@
                 xmlns:fn="http://www.w3.org/2005/xpath-functions"
                 xmlns:GbaPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-gba-persoon/v20120901"
                 xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
-                xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
-                xmlns:cat15="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/01"
                 xmlns:StUFBG0204="http://www.egem.nl/StUF/sector/bg/0204"
                 xmlns:StUF0204="http://www.egem.nl/StUF/StUF0204"
+                xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
+                xmlns:cat25="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/01"
+                xmlns:cat30="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/02"
                 xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
                 xmlns:b="http://www.b3p.nl/func">
+
     <xsl:output method="xml" encoding="UTF-8" indent="yes" />
     <xsl:strip-space elements="*" />
     <!-- usage: java -cp "./saxon9.jar;./commons-codec-1.11.jar" net.sf.saxon.Transform -s:bron.xml -xsl:copy_xml.xsl -o:output.xml -->
@@ -29,31 +31,40 @@
         </xsl:copy>
     </xsl:template>
 
-    <!-- Anonimisatie uitzonderingen voor HR natuurlijkPersoon,
-         cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang is (meestal?) geb. datum
-    -->
-    <xsl:template match="cat:natuurlijkPersoon/cat:bsn | cat15:natuurlijkPersoon/cat15:bsn">
+    <xsl:template match="cat:natuurlijkPersoon/cat:bsn | cat25:natuurlijkPersoon/cat25:bsn | cat30:natuurlijkPersoon/cat30:bsn">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
+
     <xsl:template match="cat:natuurlijkPersoon/cat:volledigeNaam |
                          cat:natuurlijkPersoon/cat:geslachtsnaam |
                          cat:natuurlijkPersoon/cat:geslachtsnaamPartner |
                          cat:natuurlijkPersoon/cat:voornamen |
                          cat:natuurlijkPersoon/cat:geboorteplaats |
-                         cat15:natuurlijkPersoon/cat15:volledigeNaam |
-                         cat15:natuurlijkPersoon/cat15:geslachtsnaam |
-                         cat15:natuurlijkPersoon/cat15:geslachtsnaamPartner |
-                         cat15:natuurlijkPersoon/cat15:voornamen |
-                         cat15:natuurlijkPersoon/cat15:geboorteplaats">
+                         cat25:natuurlijkPersoon/cat25:volledigeNaam |
+                         cat25:natuurlijkPersoon/cat25:geslachtsnaam |
+                         cat25:natuurlijkPersoon/cat25:geslachtsnaamPartner |
+                         cat25:natuurlijkPersoon/cat25:voornamen |
+                         cat25:natuurlijkPersoon/cat25:geboorteplaats |
+                         cat30:natuurlijkPersoon/cat30:volledigeNaam |
+                         cat30:natuurlijkPersoon/cat30:geslachtsnaam |
+                         cat30:natuurlijkPersoon/cat30:geslachtsnaamPartner |
+                         cat30:natuurlijkPersoon/cat30:voornamen |
+                         cat30:natuurlijkPersoon/cat30:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
         </xsl:call-template>
     </xsl:template>
-    <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang | cat15:natuurlijkPersoon/cat15:registratie/cat15:datumAanvang">
+
+    <!-- Anonimisatie uitzonderingen voor HR natuurlijkPersoon,
+         cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang is (meestal?) geb. datum
+    -->
+    <xsl:template match="cat:natuurlijkPersoon/cat:registratie/cat:datumAanvang |
+                         cat25:natuurlijkPersoon/cat25:registratie/cat25:datumAanvang |
+                         cat30:natuurlijkPersoon/cat30:registratie/cat30:datumAanvang">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
@@ -72,6 +83,7 @@
             <xsl:with-param name="mode" select="'number'" />
         </xsl:call-template>
     </xsl:template>
+
     <xsl:template match="GbaPersoon:voornamen |
                          Persoon:voornamen |
                          StUFBG0204:voornamen |
@@ -96,6 +108,7 @@
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
         </xsl:call-template>
     </xsl:template>
+
     <xsl:template match="GbaPersoon:geboortedatum | 
                          Persoon:geboortedatum | 
                          GbaPersoon:datumOverlijden | 
@@ -112,7 +125,7 @@
         <xsl:param name="e" />
         <xsl:param name="mode" select="'string'" />
 
-        <xsl:element name="{name($e)}">
+        <xsl:element name="{name($e)}" namespace="{namespace-uri($e)}">
             <!-- kopieer ook de attributen -->
             <xsl:apply-templates select="@*" />
             <!-- bereken hash met de zelfde lengte als origineel -->
