@@ -51,6 +51,8 @@
                          cat30:natuurlijkPersoon/cat30:volledigeNaam |
                          cat30:natuurlijkPersoon/cat30:geslachtsnaam |
                          cat30:natuurlijkPersoon/cat30:geslachtsnaamPartner |
+                         cat30:natuurlijkPersoon/cat30:voorvoegselGeslachtsnaam |
+                         cat30:natuurlijkPersoon/cat30:voorvoegselGeslachtsnaamPartner |
                          cat30:natuurlijkPersoon/cat30:voornamen |
                          cat30:natuurlijkPersoon/cat30:geboorteplaats">
         <xsl:call-template name="replace_hash_element">
@@ -66,7 +68,9 @@
                          cat25:natuurlijkPersoon/cat25:registratie/cat25:datumAanvang |
                          cat30:natuurlijkPersoon/cat30:registratie/cat30:datumAanvang |
                          cat30:geboortedatum |
-                         cat30:datumGeemigreerd">
+                         cat30:overlijdensdatum |
+                         cat30:datumGeemigreerd |
+                         cat30:datumEersteHuwelijk">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
