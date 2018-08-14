@@ -54,7 +54,8 @@
                          cat30:natuurlijkPersoon/cat30:voorvoegselGeslachtsnaam |
                          cat30:natuurlijkPersoon/cat30:voorvoegselGeslachtsnaamPartner |
                          cat30:natuurlijkPersoon/cat30:voornamen |
-                         cat30:natuurlijkPersoon/cat30:geboorteplaats">
+                         cat30:natuurlijkPersoon/cat30:geboorteplaats |
+                         cat30:naamPersoon/cat30:naam">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
