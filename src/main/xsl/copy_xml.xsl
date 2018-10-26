@@ -31,7 +31,9 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="cat:natuurlijkPersoon/cat:bsn | cat25:natuurlijkPersoon/cat25:bsn | cat30:natuurlijkPersoon/cat30:bsn">
+    <xsl:template match="cat:natuurlijkPersoon/cat:bsn |
+                         cat25:natuurlijkPersoon/cat25:bsn |
+                         cat30:natuurlijkPersoon/cat30:bsn">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'number'" />
@@ -55,7 +57,15 @@
                          cat30:natuurlijkPersoon/cat30:voorvoegselGeslachtsnaamPartner |
                          cat30:natuurlijkPersoon/cat30:voornamen |
                          cat30:natuurlijkPersoon/cat30:geboorteplaats |
-                         cat30:naamPersoon/cat30:naam">
+                         cat30:naamPersoon/cat30:naam |
+                         rubriek[nummer='0210']/waarde |
+                         rubriek[nummer='0210']/omschrijving |
+                         rubriek[nummer='0220']/waarde |
+                         rubriek[nummer='0220']/omschrijving |
+                         rubriek[nummer='0230']/waarde |
+                         rubriek[nummer='0230']/omschrijving |
+                         rubriek[nummer='0240']/waarde |
+                         rubriek[nummer='0240']/omschrijving">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
@@ -71,7 +81,11 @@
                          cat30:geboortedatum |
                          cat30:overlijdensdatum |
                          cat30:datumGeemigreerd |
-                         cat30:datumEersteHuwelijk">
+                         cat30:datumEersteHuwelijk |
+                         rubriek[nummer='0310']/waarde |
+                         rubriek[nummer='0310']/omschrijving |
+                         rubriek[nummer='6210']/waarde |
+                         rubriek[nummer='6210']/omschrijving">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
@@ -85,7 +99,11 @@
                          StUFBG0204:bsn-nummer |
                          StUFBG0204:bankgiroRekeningnummer |
                          StUFBG0204:nummerIdentiteitsbewijs |
-                         StUF0204:extraElement[@naam='lengteHouder']">
+                         StUF0204:extraElement[@naam='lengteHouder'] |
+                         rubriek[nummer='0110']/waarde |
+                         rubriek[nummer='0110']/omschrijving |
+                         rubriek[nummer='0120']/waarde |
+                         rubriek[nummer='0120']/omschrijving">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'number'" />
@@ -110,7 +128,9 @@
                          StUFBG0204:indicatieCuratelestelling |
                          StUFBG0204:aanduidingBijzonderNederlanderschap |
                          StUF0204:extraElement[@naam='iban'] |
-                         StUF0204:extraElement[@naam='geslachtsNaamEchtgenoot']">
+                         StUF0204:extraElement[@naam='geslachtsNaamEchtgenoot'] |
+                         rubriek[nummer='0906']/waarde |
+                         rubriek[nummer='0906']/omschrijving">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
