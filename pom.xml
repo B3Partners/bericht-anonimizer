@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <commons-codec.version>1.11</commons-codec.version>
+        <commons-codec.version>1.12</commons-codec.version>
         <saxon.version>9.0</saxon.version>
         <xmlsrcdir>${project.basedir}/src/main/xml</xmlsrcdir>
         <xmloutputdir>${project.build.directory}</xmloutputdir>
@@ -33,12 +33,28 @@
         <url>https://github.com/B3Partners/bericht-anonimizer/issues</url>
     </issueManagement>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xml-maven-plugin</artifactId>
+                    <version>1.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <defaultGoal>compile</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>xml-maven-plugin</artifactId>
-                <version>1.0.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -83,7 +99,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -112,7 +127,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>distro-assembly</id>
