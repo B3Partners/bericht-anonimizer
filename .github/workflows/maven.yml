@@ -1,25 +1,25 @@
 name: Maven Build
 
 on:
-  release:
-    types: [created]
+  push
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    name: Maven Build
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         java: [1.8, 11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-maven-
+          maven-
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
