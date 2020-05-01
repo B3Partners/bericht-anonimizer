@@ -75,6 +75,8 @@
                          cat30:natuurlijkPersoon/cat30:voornamen |
                          cat30:natuurlijkPersoon/cat30:geboorteplaats |
                          cat30:naamPersoon/cat30:naam |
+                         cat30:natuurlijkPersoon/cat30:extraElementen/cat30:extraElement[@naam ='achternaam'] |
+                         cat30:natuurlijkPersoon/cat30:extraElementen/cat30:extraElement[@naam ='voorvoegsel'] |
                          rubriek[nummer='0210']/waarde |
                          rubriek[nummer='0210']/omschrijving |
                          rubriek[nummer='0220']/waarde |
