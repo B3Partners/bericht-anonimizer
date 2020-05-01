@@ -102,7 +102,10 @@
                          rubriek[nummer='0310']/waarde |
                          rubriek[nummer='0310']/omschrijving |
                          rubriek[nummer='6210']/waarde |
-                         rubriek[nummer='6210']/omschrijving">
+                         rubriek[nummer='6210']/omschrijving |
+                         StUFBG0204:datumOntbinding |
+                         StUF0204:begindatumRelatie |
+                         StUF0204:einddatumRelatie">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />

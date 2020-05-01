@@ -1,0 +1,28 @@
+name: Maven Build
+
+on:
+  push
+
+jobs:
+  build:
+    name: Maven Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        java: [1.8, 11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          maven-
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Build with Maven
+      run: mvn -B package
