@@ -10,5 +10,5 @@
             <xsl:apply-templates select="node()|@*"/>
         </xsl:copy>
     </xsl:template>
-    <xsl:template match="comment()"/>
+    <xsl:template match="comment()" priority="10"/>
 </xsl:stylesheet>

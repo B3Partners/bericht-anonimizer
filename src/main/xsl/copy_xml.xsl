@@ -18,6 +18,23 @@
     <xsl:strip-space elements="*" />
     <!-- usage: java -cp "./saxon9.jar;./commons-codec-1.11.jar" net.sf.saxon.Transform -s:bron.xml -xsl:copy_xml.xsl -o:output.xml -->
 
+    <!--
+    het anonimiseren van PL formaat is nog niet compleet, mogelijk nog te doen:
+
+    geslacht (maar dan probleem met codelijsten)
+
+    rubriek[nummer='0410']/waarde |
+    rubriek[nummer='0410']/omschrijving |
+
+    plaatsen (maar dan probleem met verwijzingen naar BAG)
+
+    rubriek[nummer='0320']/waarde |
+    rubriek[nummer='0320']/omschrijving |
+    rubriek[nummer='0330']/waarde |
+    rubriek[nummer='0330']/omschrijving |
+
+    Mogelijk zijn er meer.. maar die heb ik nog niet gezien
+    -->
     <xsl:template match="/">
         <xsl:comment select="concat ('Geanonimiseerd door B3Partners BV op ', current-date(), ', zie commentaar in bericht.')" />
         <xsl:text>&#10;</xsl:text>
