@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <commons-codec.version>1.14</commons-codec.version>
+        <commons-codec.version>1.15</commons-codec.version>
         <saxon.version>9.0</saxon.version>
         <xmlsrcdir>${project.basedir}/src/main/xml</xmlsrcdir>
         <xmloutputdir>${project.build.directory}</xmloutputdir>
