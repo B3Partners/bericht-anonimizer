@@ -5,14 +5,20 @@
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:fn="http://www.w3.org/2005/xpath-functions"
                 xmlns:GbaPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-gba-persoon/v20120901"
-                xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
+                xmlns:brk1Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20120201"
                 xmlns:StUFBG0204="http://www.egem.nl/StUF/sector/bg/0204"
                 xmlns:StUF0204="http://www.egem.nl/StUF/StUF0204"
+                xmlns:WOZ="http://www.waarderingskamer.nl/StUF/0312"
                 xmlns:cat="http://schemas.kvk.nl/schemas/hrip/catalogus/2013/01"
                 xmlns:cat25="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/01"
                 xmlns:cat30="http://schemas.kvk.nl/schemas/hrip/catalogus/2015/02"
                 xmlns:digest="org.apache.commons.codec.digest.DigestUtils"
-                xmlns:b="http://www.b3p.nl/func">
+                xmlns:BG="http://www.egem.nl/StUF/sector/bg/0310"
+                xmlns:b="http://www.b3p.nl/func"
+                xmlns:Persoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-persoon/v20210702"
+                xmlns:KIMBRPPersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/kimbrp-persoon/v20210903"
+                xmlns:Typen="http://www.kadaster.nl/schemas/brk-levering/snapshot/imkad-typen/v20210702"
+                xmlns:KIMNHRRechtspersoon="http://www.kadaster.nl/schemas/brk-levering/snapshot/kimnhr-rechtspersoon/v20210702" >
 
     <xsl:output method="xml" encoding="UTF-8" indent="yes" />
     <xsl:strip-space elements="*" />
@@ -50,7 +56,23 @@
 
     <xsl:template match="cat:natuurlijkPersoon/cat:bsn |
                          cat25:natuurlijkPersoon/cat25:bsn |
-                         cat30:natuurlijkPersoon/cat30:bsn">
+                         cat30:natuurlijkPersoon/cat30:bsn |
+                         StUF0204:inp.bsn |
+                         BG:inp.bsn |
+                         WOZ:soFiNummer |
+                         WOZ:aanvullingSoFiNummer |
+                         GbaPersoon:BSN |
+                         StUFBG0204:a-nummer |
+                         StUFBG0204:bsn-nummer |
+                         StUFBG0204:bankgiroRekeningnummer |
+                         StUFBG0204:nummerIdentiteitsbewijs |
+                         StUF0204:extraElement[@naam='lengteHouder'] |
+                         rubriek[nummer='0110']/waarde |
+                         rubriek[nummer='0110']/omschrijving |
+                         rubriek[nummer='0120']/waarde |
+                         rubriek[nummer='0120']/omschrijving |
+                         KIMBRPPersoon:geboorteland/Typen:code |
+                         KIMBRPPersoon:bsn">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'number'" />
@@ -77,6 +99,13 @@
                          cat30:naamPersoon/cat30:naam |
                          cat30:natuurlijkPersoon/cat30:extraElementen/cat30:extraElement[@naam ='achternaam'] |
                          cat30:natuurlijkPersoon/cat30:extraElementen/cat30:extraElement[@naam ='voorvoegsel'] |
+                         StUF0204:volledigeNaam |
+                         StUF0204:geslachtsnaam |
+                         StUF0204:geslachtsnaamPartner |
+                         StUF0204:voorvoegselGeslachtsnaam |
+                         StUF0204:voorvoegselGeslachtsnaamPartner |
+                         StUF0204:voornamen |
+                         StUF0204:geboorteplaats |
                          rubriek[nummer='0210']/waarde |
                          rubriek[nummer='0210']/omschrijving |
                          rubriek[nummer='0220']/waarde |
@@ -84,7 +113,12 @@
                          rubriek[nummer='0230']/waarde |
                          rubriek[nummer='0230']/omschrijving |
                          rubriek[nummer='0240']/waarde |
-                         rubriek[nummer='0240']/omschrijving">
+                         rubriek[nummer='0240']/omschrijving |
+                         KIMBRPPersoon:geslachtsnaam |
+                         KIMBRPPersoon:voorvoegselsgeslachtsnaam |
+                         KIMBRPPersoon:voornamen |
+                         KIMBRPPersoon:geboorteplaats |
+                         KIMBRPPersoon:geboorteland/Typen:waarde">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'restoreWhitespace'" />
@@ -107,7 +141,8 @@
                          rubriek[nummer='6210']/omschrijving |
                          StUFBG0204:datumOntbinding |
                          StUF0204:begindatumRelatie |
-                         StUF0204:einddatumRelatie">
+                         StUF0204:einddatumRelatie |
+                         KIMBRPPersoon:geboortedatum/Typen:datum">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
             <xsl:with-param name="mode" select="'date'" />
@@ -115,37 +150,24 @@
         </xsl:call-template>
     </xsl:template>
 
-    <!-- Anonimisatie uitzonderingen voor GBA Persoon en Persoon en StUFBG0204/StUF0204 PRS -->
-    <xsl:template match="GbaPersoon:BSN |
-                         StUFBG0204:a-nummer |
-                         StUFBG0204:bsn-nummer |
-                         StUFBG0204:bankgiroRekeningnummer |
-                         StUFBG0204:nummerIdentiteitsbewijs |
-                         StUF0204:extraElement[@naam='lengteHouder'] |
-                         rubriek[nummer='0110']/waarde |
-                         rubriek[nummer='0110']/omschrijving |
-                         rubriek[nummer='0120']/waarde |
-                         rubriek[nummer='0120']/omschrijving">
-        <xsl:call-template name="replace_hash_element">
-            <xsl:with-param name="e" select="." />
-            <xsl:with-param name="mode" select="'number'" />
-        </xsl:call-template>
-    </xsl:template>
 
     <xsl:template match="GbaPersoon:voornamen |
                          Persoon:voornamen |
                          StUFBG0204:voornamen |
                          StUFBG0204:voorletters |
+                         BG:voorletters |
                          GbaPersoon:geboorteplaats |
                          Persoon:geboorteplaats |
                          StUFBG0204:geboorteplaats |
                          GbaPersoon:geslachtsnaam |
                          Persoon:geslachtsnaam |
                          StUFBG0204:geslachtsnaam |
+                         BG:geslachtsnaam |
                          GbaPersoon:voorvoegselsGeslachtsnaam |
                          GbaPersoon:voorvoegselsgeslachtsnaam |
                          Persoon:voorvoegselsGeslachtsnaam |
                          StUFBG0204:voorvoegselGeslachtsnaam |
+                         BG:voorvoegselGeslachtsnaam |
                          StUFBG0204:indicatieGezagMinderjarige |
                          StUFBG0204:indicatieCuratelestelling |
                          StUFBG0204:aanduidingBijzonderNederlanderschap |
@@ -164,6 +186,7 @@
                          GbaPersoon:datumOverlijden |
                          Persoon:datumOverlijden |
                          StUFBG0204:geboortedatum |
+                         BG:geboortedatum |
                          StUFBG0204:datumOverlijden">
         <xsl:call-template name="replace_hash_element">
             <xsl:with-param name="e" select="." />
@@ -176,6 +199,21 @@
         <xsl:param name="mode" select="'string'" />
         <xsl:param name="withdash" select="'-'" />
 
+        <xsl:choose>
+            <xsl:when test="$mode eq 'date'">
+                <xsl:text>&#10;</xsl:text>
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
+            </xsl:when>
+            <xsl:when test="$mode eq 'number'">
+                <xsl:text>&#10;</xsl:text>
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': getal is met behoud van vorm vervangen door een hash van van het oorspronkelijke getal.')" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text>&#10;</xsl:text>
+                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met dezelfde lengte.')" />
+            </xsl:otherwise>
+        </xsl:choose>
+
         <xsl:element name="{name($e)}" namespace="{namespace-uri($e)}">
             <!-- kopieer ook de attributen -->
             <xsl:apply-templates select="@*" />
@@ -186,18 +224,6 @@
                 <xsl:with-param name="withdash" select="$withdash" />
             </xsl:call-template>
         </xsl:element>
-
-        <xsl:choose>
-            <xsl:when test="$mode eq 'date'">
-                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': datum is met behoud van vorm vervangen door een hash van de oorspronkelijke datum.')" />
-            </xsl:when>
-            <xsl:when test="$mode eq 'number'">
-                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': getal is met behoud van vorm vervangen door een hash van van het oorspronkelijke getal.')" />
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:comment select="concat ('Anonimisatie ''', name($e), ''': waarde is vervangen door een hash van de oorspronkelijke waarde met de zelfde lengte.')" />
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:template>
 
     <xsl:template name="hashed_length" as="xs:string">
