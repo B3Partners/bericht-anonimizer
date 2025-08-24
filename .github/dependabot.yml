@@ -3,9 +3,7 @@ updates:
 - package-ecosystem: maven
   directory: "/"
   schedule:
-    interval: daily
-    time: "06:00"
-    timezone: Europe/Amsterdam
+    interval: monthly
   open-pull-requests-limit: 25
   reviewers:
   - mprins
@@ -16,9 +14,7 @@ updates:
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: "weekly"
-    day: saturday
-    timezone: Europe/Amsterdam
+    interval: monthly
   assignees:
   - mprins
   labels:
