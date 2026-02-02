@@ -8,10 +8,10 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'B3Partners/brmo'
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'B3Partners/bericht-anonimizer'
     env:
       PR_URL: ${{ github.event.pull_request.html_url }}
-      PR_REPO: 'B3Partners/brmo'
+      PR_REPO: 'B3Partners/bericht-anonimizer'
       GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     steps:
       - name: 'Dependabot metadata'
